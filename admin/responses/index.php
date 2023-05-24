@@ -30,13 +30,26 @@
 				<tbody>
 					<?php 
 					$i = 1;
-						$qry = $conn->query("SELECT q.id, r.response_message, q.question FROM `questions` q inner join `responses` r on q.response_id = r.id order by q.question asc ");
+						$qry = $conn->query("SELECT * FROM `questions` ORDER BY id");
 						while($row = $qry->fetch_assoc()):
-					?>
+							
+
+							$row['response_id'] = array(1, 2, 3);
+							$responceMessage = $conn->query("SELECT * FROM `responses` WHERE id IN (".implode(',', $row['response_id']).")")->fetch_all(MYSQLI_ASSOC); 
+							?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
 							<td><?php echo $row['question'] ?></td>
-							<td><span class="truncate"><?php echo $row['response_message'] ?></span></td>
+							<td><span class="truncate">
+								<?php 
+									foreach ($responceMessage as $key => $value) {
+										echo $value['response_message'];
+										if ($key < count($responceMessage) - 1) {
+											echo ', ';
+										}
+									}	
+								?>
+							</span></td>
 							<td align="center">
 								 <button type="button" class="btn btn-flat btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown">
 				                  		Action

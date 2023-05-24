@@ -16,38 +16,33 @@ class Master extends DBConnection
 
 	public function save_response()
 	{
-		extract($_POST);
-
-
-
-		foreach ($response_message as $response_message_key => $response_message_text) {
-
-
-			if (!empty($id)) {
-				$del = $this->conn->query("DELETE FROM `questions` where id= '$id' ");
-				if (!$del) {
-					return 2;
-					exit;
-				}
-			}
-			$data = "";
-			$ins_resp = $this->conn->query("INSERT INTO `responses` set response_message = '{$response_message_text}' ");
-			if (!$ins_resp) {
-				return 2;
-				exit;
-			}
-			$resp_id = $this->conn->insert_id;
-
-			foreach ($question as $k => $v) {
-				$data = " response_id = {$resp_id} ";
-				$data .= ", `question` = '$question[$k]' ";
-				$ins[] = $this->conn->query("INSERT INTO `questions` set $data ");
-			}
+		
+		echo "<pre>";
+		print_r( $_POST );
+		echo "</pre>";
+		exit();
+		
+		if(empty($_POST['response_message'])){
+			return 2;
+			exit;
 		}
 
-
-		$this->settings->set_flashdata("success", " Data successfully saved");
+		$resp_id = array();
+		foreach ($_POST['response_message'] as $key => $value) {
+			$ins_resp = $this->conn->query("INSERT INTO `responses` set response_message = '{$value}' ");
+			$resp_id[] = $this->conn->insert_id;			
+		}
+		$resp_id = implode(", ",$resp_id);
+	
+		$questionsDB = $this->conn->query("INSERT INTO `questions` set response_id = '{$resp_id}', `question` = '{$_POST["question"]}' ");
+		
+		if($questionsDB){
+			$this->settings->set_flashdata("success", " Data successfully saved");
 			return 1;
+		}else{
+			return 2;
+			exit;
+		}
 	}
 	public function delete_response()
 	{
